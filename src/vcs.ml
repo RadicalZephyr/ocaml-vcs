@@ -14,6 +14,7 @@ let copy_file from_path to_path =
   Out_channel.close out_ch
 
 let rec copy_dir from_path to_path =
+  ensure_dir_exists to_path;
   Sys.ls_dir from_path
   |> List.iter ~f:(fun item ->
                    copy from_path to_path item)
