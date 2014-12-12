@@ -1,32 +1,38 @@
 open Core.Std
 
-let copy_file to_path from_path = 
+let ensure_dir_exists dir =
+  match Sys.file_exists dir with
+  | `Yes | `Unknown -> ()
+  | `No ->
+     Unix.mkdir dir
 
-	let to_file_path = to_path^"/"^from_path in 
-	let in_ch = In_channel.create from_path in 
-	let out_ch = Out_channel.create to_file_path in 
-	Out_channel.output_string out_ch (In_channel.input_all in_ch) ;
-	Out_channel.flush out_ch;
-	Out_channel.close out_ch;
-	In_channel.close in_ch
+let copy_file from_path to_path =
+  let in_ch = In_channel.create from_path in
+  let out_ch = Out_channel.create to_path in
+  In_channel.iter_lines in_ch ~f:(Out_channel.output_string out_ch);
+  In_channel.close in_ch;
+  Out_channel.close out_ch
+
+let rec copy_dir from_path to_path =
+  Sys.ls_dir from_path
+  |> List.iter ~f:(fun item ->
+                   copy from_path to_path item)
+
+and copy from_root to_root item =
+  let from_path = Filename.concat from_root item in
+  let   to_path = Filename.concat   to_root item in
+  match Sys.is_directory from_path with
+  | `Unknown -> ()
+  | `No -> copy_file from_path to_path
+  | `Yes -> copy_dir from_path to_path
 
 
-let copy_dir to_path from_path = 
-	()
-
-let copy to_path from_path = 
-	if Sys.is_directory_exn from_path
-	then copy_dir to_path from_path
-	else copy_file to_path from_path
-
-let main () = 
-	let cwd = Sys.getcwd () in 
-	let copy_to = cwd ^ ".bak" in
-	Unix.mkdir copy_to;
-	let dir_list = Sys.ls_dir cwd in 
-	List.iter ~f:(copy copy_to) dir_list 
-	
+let main () =
+  let cwd = Sys.getcwd () in
+  let dst = cwd ^ ".bak" in
+  ensure_dir_exists dst;
+  copy cwd dst "."
 
 
-let () = 
-	main ()
+let () =
+  main ()
