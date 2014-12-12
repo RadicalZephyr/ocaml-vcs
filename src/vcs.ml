@@ -30,7 +30,8 @@ and copy from_root to_root item =
 
 let main () =
   let cwd = Sys.getcwd () in
-  let dst = cwd ^ ".bak" in
+  let root = Filename.dirname cwd in
+  let dst = Filename.concat root ".myvcs" in
   ensure_dir_exists dst;
   copy cwd dst "."
 
