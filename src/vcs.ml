@@ -9,7 +9,17 @@ let ensure_dir_exists dir =
 let copy_file from_path to_path =
   let in_ch = In_channel.create from_path in
   let out_ch = Out_channel.create to_path in
-  In_channel.iter_lines in_ch ~f:(Out_channel.output_string out_ch);
+  let len = 4096 in
+  let buf = String.create len in
+  let rec copy () =
+    match In_channel.input in_ch ~buf ~pos:0 ~len with
+    | 0 -> ()
+    | len ->
+       Out_channel.output out_ch ~buf ~pos:0 ~len;
+       copy ()
+  in
+
+  copy ();
   In_channel.close in_ch;
   Out_channel.close out_ch
 
