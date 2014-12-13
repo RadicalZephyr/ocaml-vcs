@@ -40,8 +40,11 @@ let match_last inputList =
   | None -> 0
   | Some x -> x
 
+let root_backup_dir root =
+  Filename.concat root ".myvcs"
+
 let backup_name root =
-  let backup_dir = Filename.concat root ".myvcs" in
+  let backup_dir = root_backup_dir root in
   ensure_dir_exists backup_dir;
   Sys.ls_dir backup_dir
   |>  List.map ~f:Int.of_string
@@ -60,7 +63,7 @@ let backup () =
   copy cwd new_backup "."
 
 let find_backup_folder root revnum =
-  let backup_dir = Filename.concat root ".myvcs" in
+  let backup_dir = root_backup_dir root in
   match Sys.file_exists backup_dir with
   | `No | `Unknown -> invalid_arg "Root Backup folder .myvcs does not exist"
   | `Yes ->
