@@ -55,28 +55,30 @@ let backup () =
   let cwd = Sys.getcwd () in
   let root = Filename.dirname cwd in
   let new_backup = backup_name root in
-  printf "Backing up into folder %s" new_backup;
+  printf "Backing up into folder %s\n" new_backup;
   ensure_dir_exists new_backup;
   copy cwd new_backup "."
 
 let checkout revnum =
-  printf "Checkout revision number: %d" revnum
+  printf "Checkout revision number: %d\n" revnum
 
-let spec =
-  let open Command.Spec in
-  empty
-  +> anon ("subcommand" %: string)
-  +> anon (maybe_with_default (-1) ("revnum" %: int))
+
+let backup_command =
+  Command.basic ~summary:""
+                Command.Spec.empty
+                backup
+
+let checkout_command =
+  Command.basic
+    ~summary:""
+    Command.Spec.(empty
+                  +> anon ("revnum" %: int))
+    (fun revnum () -> checkout revnum)
 
 let command =
-  Command.basic
+  Command.group
     ~summary:"Backup your stuff!"
-    ~readme:(fun () -> "")
-    spec
-    (fun subcommand revision () ->
-     match subcommand with
-     | "backup" -> backup ()
-     | "checkout" -> checkout revision)
+    ["backup", backup_command; "checkout", checkout_command]
 
 let () =
   Command.run ~version:"0.1" ~build_info:"" command
