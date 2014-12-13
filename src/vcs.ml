@@ -43,7 +43,7 @@ let match_last inputList =
 let root_backup_dir root =
   Filename.concat root ".myvcs"
 
-let backup_name root =
+let next_backup_path root =
   let backup_dir = root_backup_dir root in
   ensure_dir_exists backup_dir;
   Sys.ls_dir backup_dir
@@ -57,7 +57,7 @@ let backup_name root =
 let backup () =
   let cwd = Sys.getcwd () in
   let root = Filename.dirname cwd in
-  let new_backup = backup_name root in
+  let new_backup = next_backup_path root in
   printf "Backing up into folder %s\n" new_backup;
   ensure_dir_exists new_backup;
   copy cwd new_backup "."
