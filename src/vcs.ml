@@ -59,24 +59,24 @@ let backup () =
   ensure_dir_exists new_backup;
   copy cwd new_backup "."
 
-let find_backup_folder root revnum = 
-  let backup_dir = Filename.concat root ".myvcs" in 
-  match Sys.file_exists backup_dir with 
+let find_backup_folder root revnum =
+  let backup_dir = Filename.concat root ".myvcs" in
+  match Sys.file_exists backup_dir with
   | `No | `Unknown -> invalid_arg "Root Backup folder .myvcs does not exist"
-  | `Yes -> 
-      let backup_version = Filename.concat backup_dir (Int.to_string revnum) in 
+  | `Yes ->
+      let backup_version = Filename.concat backup_dir (Int.to_string revnum) in
       match Sys.file_exists backup_version with
       | `No | `Unknown -> invalid_arg (sprintf "Backup Version %d does not exist" revnum)
       | `Yes -> backup_version
 
-let delete_dir_contents directory = 
+let delete_dir_contents directory =
   Sys.ls_dir directory
-  |> List.iter ~f:Unix.remove 
+  |> List.iter ~f:Unix.remove
 
 let checkout revnum =
-  let cwd = Sys.getcwd () in 
+  let cwd = Sys.getcwd () in
   let root = Filename.dirname cwd in
-  let backup_version = find_backup_folder root revnum in 
+  let backup_version = find_backup_folder root revnum in
   printf "Checking out Revision %d\n" revnum;
   delete_dir_contents cwd ;
   copy backup_version cwd "."
