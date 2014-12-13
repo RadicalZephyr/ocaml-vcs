@@ -24,7 +24,6 @@ let copy_file from_path to_path =
   In_channel.close in_ch;
   Out_channel.close out_ch
 
-
 let rec copy from_root to_root item =
   let from_path = Filename.concat from_root item in
   let   to_path = Filename.concat   to_root item in
@@ -41,8 +40,6 @@ let match_last inputList =
   | None -> 0
   | Some x -> x
 
-
-
 let backup_name root =
   let backup_dir = Filename.concat root ".myvcs" in
   ensure_dir_exists backup_dir;
@@ -53,10 +50,6 @@ let backup_name root =
   |> Int.succ
   |> Int.to_string
   |> Filename.concat backup_dir
-
-
-
-
 
 let main () =
   let cwd = Sys.getcwd () in
