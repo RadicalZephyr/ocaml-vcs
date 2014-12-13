@@ -43,21 +43,27 @@ let match_last inputList =
 let root_backup_dir root =
   Filename.concat root ".myvcs"
 
-let next_backup_path root =
-  let backup_dir = root_backup_dir root in
-  ensure_dir_exists backup_dir;
-  Sys.ls_dir backup_dir
+let latest_backup_revision root =
+  Sys.ls_dir (root_backup_dir root)
   |>  List.map ~f:Int.of_string
   |> List.sort ~cmp:Int.compare
   |> match_last
-  |> Int.succ
+
+let backup_path root rev =
+  let backup_root = root_backup_dir root in
+  rev
   |> Int.to_string
-  |> Filename.concat backup_dir
+  |> Filename.concat backup_root
+
+let next_backup_path root latest_rev =
+  Int.succ latest_rev
+  |> backup_path root
 
 let backup () =
   let cwd = Sys.getcwd () in
   let root = Filename.dirname cwd in
-  let new_backup = next_backup_path root in
+  let latest_rev = latest_backup_revision root in
+  let new_backup = next_backup_path root latest_rev in
   printf "Backing up into folder %s\n" new_backup;
   ensure_dir_exists new_backup;
   copy cwd new_backup "."
