@@ -35,6 +35,11 @@ let rec copy from_root to_root item =
      Sys.ls_dir from_path
      |> List.iter ~f:(fun item ->
                       copy from_path to_path item)
+
+let delete_dir_contents directory =
+  Sys.ls_dir directory
+  |> List.iter ~f:Unix.remove
+
 let match_last inputList =
   match List.last inputList with
   | None -> 0
@@ -59,15 +64,6 @@ let next_backup_path root latest_rev =
   Int.succ latest_rev
   |> backup_path root
 
-let backup () =
-  let cwd = Sys.getcwd () in
-  let root = Filename.dirname cwd in
-  let latest_rev = latest_backup_revision root in
-  let new_backup = next_backup_path root latest_rev in
-  printf "Backing up into folder %s\n" new_backup;
-  ensure_dir_exists new_backup;
-  copy cwd new_backup "."
-
 let find_backup_folder root revnum =
   let backup_dir = root_backup_dir root in
   match Sys.file_exists backup_dir with
@@ -78,9 +74,19 @@ let find_backup_folder root revnum =
       | `No | `Unknown -> invalid_arg (sprintf "Backup Version %d does not exist" revnum)
       | `Yes -> backup_version
 
-let delete_dir_contents directory =
-  Sys.ls_dir directory
-  |> List.iter ~f:Unix.remove
+let backup () =
+  let cwd = Sys.getcwd () in
+  let root = Filename.dirname cwd in
+  let latest_rev = latest_backup_revision root in
+  let new_backup = next_backup_path root latest_rev in
+  printf "Backing up into folder %s\n" new_backup;
+  ensure_dir_exists new_backup;
+  copy cwd new_backup "."
+
+let latest () =
+  let cwd = Sys.getcwd () in
+  let root = Filename.dirname cwd in
+  printf "Checking out most recent revision.\n"
 
 let checkout revnum =
   let cwd = Sys.getcwd () in
