@@ -90,20 +90,15 @@ let checkout revnum =
   delete_dir_contents cwd ;
   copy backup_version cwd "."
 
-let latest () =
-  let cwd = Sys.getcwd () in
-  let root = Filename.dirname cwd in
-  printf "Checking out most recent revision.\n"
+let backup_command =
+  Command.basic ~summary:""
+                Command.Spec.empty
+                backup
 
 let latest_command =
   Command.basic ~summary:"Checkout the most recent backup."
                 Command.Spec.empty
                 latest
-
-let backup_command =
-  Command.basic ~summary:""
-                Command.Spec.empty
-                backup
 
 let checkout_command =
   Command.basic
